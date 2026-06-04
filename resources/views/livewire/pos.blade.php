@@ -15,6 +15,12 @@
             </div>
 
             <div class="flex space-x-2">
+                <!-- Language Switcher -->
+                <div class="flex bg-gray-100 rounded-lg p-1">
+                    <button wire:click="changeLocale('id')" class="px-2 py-1 text-xs font-bold rounded {{ app()->getLocale() === 'id' ? 'bg-white shadow text-blue-600' : 'text-gray-500' }}">ID</button>
+                    <button wire:click="changeLocale('en')" class="px-2 py-1 text-xs font-bold rounded {{ app()->getLocale() === 'en' ? 'bg-white shadow text-blue-600' : 'text-gray-500' }}">EN</button>
+                </div>
+
                 <!-- Mobile Cart Toggle -->
                 <button @click="showCart = !showCart" class="md:hidden bg-blue-100 text-blue-600 p-2 rounded-lg relative">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,10 +50,10 @@
                     <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
                         <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     </span>
-                    <input type="text" wire:model.live="search" placeholder="Search products..." class="w-full pl-10 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
+                    <input type="text" wire:model.live="search" placeholder="{{ __('Search products...') }}" class="w-full pl-10 border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm">
                 </div>
                 <select wire:model.live="selectedCategory" class="border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">All Categories</option>
+                    <option value="">{{ __('All Categories') }}</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->id }}">{{ $category->name }}</option>
                     @endforeach
@@ -71,7 +77,7 @@
                         </div>
                     @empty
                         <div class="col-span-full py-20 text-center">
-                            <div class="text-gray-400 mb-2 italic">No products found</div>
+                            <div class="text-gray-400 mb-2 italic">{{ __('No products found') }}</div>
                         </div>
                     @endforelse
                 </div>
@@ -98,7 +104,7 @@
 
             <aside class="relative w-4/5 max-w-sm bg-white h-full flex flex-col shadow-2xl">
                 <div class="p-4 border-b flex justify-between items-center bg-blue-600 text-white">
-                    <span class="font-bold">Current Order</span>
+                    <span class="font-bold">{{ __('Current Order') }}</span>
                     <button @click="showCart = false" class="text-white hover:text-gray-200">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
@@ -134,33 +140,39 @@
     <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50 p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col max-h-full">
             <div class="p-4 border-b flex justify-between items-center bg-gray-50">
-                <span class="font-bold">Transaction Receipt</span>
+                <span class="font-bold">{{ __('Transaction Receipt') }}</span>
                 <button wire:click="closeReceipt" class="text-gray-500 hover:text-gray-700">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            
+
             <div id="receipt-content" class="flex-1 overflow-y-auto p-6 font-mono text-sm leading-tight bg-white">
                 <div class="text-center mb-4">
                     <div class="font-bold text-lg">CoffeePOS</div>
                     <div>{{ $lastSale->branch->name }}</div>
                     <div class="text-xs">{{ $lastSale->branch->address }}</div>
-                    <div class="text-xs">Telp: {{ $lastSale->branch->phone }}</div>
+                    <div class="text-xs">{{ __('Phone') }}: {{ $lastSale->branch->phone }}</div>
                 </div>
 
                 <div class="border-t border-dashed py-2 space-y-1">
                     <div class="flex justify-between">
-                        <span>Order #</span>
+                        <span>{{ __('Order #') }}</span>
                         <span>{{ $lastSale->order_number }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span>Date</span>
+                        <span>{{ __('Date') }}</span>
                         <span>{{ $lastSale->created_at->format('d/m/Y H:i') }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span>Cashier</span>
+                        <span>{{ __('Cashier') }}</span>
                         <span>{{ $lastSale->user->name }}</span>
                     </div>
+                    @if($lastSale->customer_name)
+                    <div class="flex justify-between">
+                        <span>{{ __('Customer') }}</span>
+                        <span>{{ $lastSale->customer_name }}</span>
+                    </div>
+                    @endif
                 </div>
 
                 <div class="border-t border-dashed py-2">
@@ -177,29 +189,48 @@
 
                 <div class="border-t border-dashed py-2 space-y-1">
                     <div class="flex justify-between">
-                        <span>SUBTOTAL</span>
+                        <span>{{ __('SUBTOTAL') }}</span>
                         <span>IDR {{ number_format($lastSale->total_amount, 0, ',', '.') }}</span>
                     </div>
+                    @if($lastSale->discount > 0)
                     <div class="flex justify-between text-red-500">
-                        <span>DISCOUNT</span>
+                        <span>{{ __('DISCOUNT') }}</span>
                         <span>-{{ number_format($lastSale->discount, 0, ',', '.') }}</span>
                     </div>
+                    @endif
                     <div class="flex justify-between font-bold text-lg pt-1 border-t border-dashed">
-                        <span>TOTAL</span>
+                        <span>{{ __('TOTAL') }}</span>
                         <span>IDR {{ number_format($lastSale->final_amount, 0, ',', '.') }}</span>
                     </div>
                 </div>
 
+                <div class="border-t border-dashed py-2 space-y-1 text-xs">
+                    <div class="flex justify-between">
+                        <span>{{ __('Payment Method') }}</span>
+                        <span class="uppercase">{{ __($lastSale->payment_method) }}</span>
+                    </div>
+                    @if($lastSale->payment_method === 'cash')
+                    <div class="flex justify-between">
+                        <span>{{ __('Amount Received') }}</span>
+                        <span>IDR {{ number_format($lastSale->received_amount, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between font-bold">
+                        <span>{{ __('Change') }}</span>
+                        <span>IDR {{ number_format($lastSale->change_amount, 0, ',', '.') }}</span>
+                    </div>
+                    @endif
+                </div>
+
                 <div class="text-center mt-6 text-xs italic">
-                    Thank you for your visit!<br>
-                    Please come again.
+                    {{ __('Thank you for your visit!') }}<br>
+                    {{ __('Please come again.') }}
                 </div>
             </div>
 
             <div class="p-4 bg-gray-50 border-t flex space-x-2">
                 <button onclick="window.print()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
                     <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                    PRINT RECEIPT
+                    {{ __('PRINT RECEIPT') }}
                 </button>
             </div>
         </div>

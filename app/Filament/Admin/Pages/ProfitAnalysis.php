@@ -9,6 +9,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
+use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 
 class ProfitAnalysis extends Page implements HasTable
@@ -28,36 +29,42 @@ class ProfitAnalysis extends Page implements HasTable
     {
         return $table
             ->query(
-                SaleItem::query()
+                Product::query()
                     ->select(
-                        'product_id',
-                        DB::raw('SUM(quantity) as total_qty'),
-                        DB::raw('SUM(total_price) as total_revenue'),
-                        DB::raw('SUM(quantity * products.cost_price) as total_cost'),
-                        DB::raw('SUM(total_price - (quantity * products.cost_price)) as total_profit')
+                        'products.id',
+                        'products.name',
+                        DB::raw('SUM(sale_items.quantity) as total_qty'),
+                        DB::raw('SUM(sale_items.total_price) as total_revenue'),
+                        DB::raw('SUM(sale_items.quantity * products.cost_price) as total_cost'),
+                        DB::raw('SUM(sale_items.total_price - (sale_items.quantity * products.cost_price)) as total_profit')
                     )
-                    ->join('products', 'sale_items.product_id', '=', 'products.id')
-                    ->groupBy('product_id')
+                    ->join('sale_items', 'products.id', '=', 'sale_items.product_id')
+                    ->groupBy('products.id', 'products.name')
             )
+            ->defaultSort('total_profit', 'desc')
             ->columns([
-                TextColumn::make('product.name')
+                TextColumn::make('name')
                     ->label('Product')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('total_qty')
                     ->label('Qty Sold')
-                    ->numeric(),
+                    ->numeric()
+                    ->sortable(),
                 TextColumn::make('total_revenue')
                     ->label('Revenue')
-                    ->money('IDR'),
+                    ->money('IDR')
+                    ->sortable(),
                 TextColumn::make('total_cost')
                     ->label('Total Cost')
-                    ->money('IDR'),
+                    ->money('IDR')
+                    ->sortable(),
                 TextColumn::make('total_profit')
                     ->label('Gross Profit')
                     ->money('IDR')
                     ->color('success')
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->sortable(),
             ]);
     }
 }

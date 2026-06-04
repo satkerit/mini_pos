@@ -6,7 +6,8 @@ use Filament\Pages\Page;
 use App\Models\SaleItem;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 
@@ -50,7 +51,14 @@ class KitchenDisplay extends Page implements HasTable
                     ->button()
                     ->color('success')
                     ->icon('heroicon-o-check')
-                    ->action(fn (SaleItem $record) => $record->update(['is_prepared' => true])),
+                    ->action(function (SaleItem $record) {
+                        $record->update(['is_prepared' => true]);
+
+                        Notification::make()
+                            ->title('Item marked as done')
+                            ->success()
+                            ->send();
+                    }),
             ])
             ->poll('5s');
     }

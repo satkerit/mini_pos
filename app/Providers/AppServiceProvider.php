@@ -9,6 +9,8 @@ use App\Models\StockOpname;
 use App\Observers\StockAdjustmentObserver;
 use App\Observers\StockOpnameObserver;
 
+use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -26,5 +28,15 @@ class AppServiceProvider extends ServiceProvider
     {
         StockAdjustment::observe(StockAdjustmentObserver::class);
         StockOpname::observe(StockOpnameObserver::class);
+
+        LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
+            $switch
+                ->locales(['en', 'id'])
+                ->labels([
+                    'en' => 'English',
+                    'id' => 'Indonesia',
+                ])
+                ->circular();
+        });
     }
 }

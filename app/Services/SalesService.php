@@ -23,10 +23,14 @@ class SalesService
             $sale = Sale::create([
                 'branch_id' => $data['branch_id'],
                 'user_id' => $data['user_id'],
+                'customer_name' => $data['customer_name'] ?? null,
                 'order_number' => $this->generateOrderNumber($data['branch_id']),
                 'total_amount' => $data['total_amount'],
                 'discount' => $data['discount'] ?? 0,
                 'final_amount' => $data['final_amount'],
+                'payment_method' => $data['payment_method'] ?? 'cash',
+                'received_amount' => $data['received_amount'] ?? 0,
+                'change_amount' => $data['change_amount'] ?? 0,
                 'status' => 'completed',
             ]);
 

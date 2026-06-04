@@ -37,6 +37,9 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-shopping-cart')
                     ->sort(1),
             ])
+            ->authMiddleware([
+                \App\Http\Middleware\SetLocale::class,
+            ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
             ->pages([

@@ -14,7 +14,7 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'branch_id'])]
+#[Fillable(['name', 'email', 'password', 'branch_id', 'locale'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable implements FilamentUser
 {

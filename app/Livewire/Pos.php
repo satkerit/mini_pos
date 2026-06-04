@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Branch;
+use App\Models\Sale;
 use App\Services\SalesService;
 use Illuminate\Support\Facades\Auth;
 
@@ -21,15 +22,52 @@ class Pos extends Component
     public $paymentMethod = 'cash';
     public $showCart = false;
     public $lastSale = null;
+    public $customerName = '';
+    public $receivedAmount = 0;
+    public $changeAmount = 0;
+    public $locale;
 
     public function mount()
     {
         $this->branch_id = Auth::user()->branch_id ?? Branch::first()?->id;
+        $this->locale = auth()->user()->locale ?? app()->getLocale();
+    }
+
+    public function changeLocale($lang)
+    {
+        if (in_array($lang, ['en', 'id'])) {
+            $this->locale = $lang;
+            if (auth()->check()) {
+                auth()->user()->update(['locale' => $lang]);
+            }
+            session(['locale' => $lang]);
+            app()->setLocale($lang);
+            return redirect(request()->header('Referer'));
+        }
+    }
+
+    public function updatedReceivedAmount()
+    {
+        $this->calculateChange();
+    }
+
+    public function updatedDiscount()
+    {
+        $this->calculateTotal();
+        $this->calculateChange();
+    }
+
+    public function calculateChange()
+    {
+        $this->changeAmount = max(0, $this->receivedAmount - $this->finalTotal);
     }
 
     public function closeReceipt()
     {
         $this->lastSale = null;
+        $this->customerName = '';
+        $this->receivedAmount = 0;
+        $this->changeAmount = 0;
     }
 
     public function toggleCart()
@@ -111,9 +149,13 @@ class Pos extends Component
         $sale = $salesService->createSale([
             'branch_id' => $this->branch_id,
             'user_id' => Auth::id(),
+            'customer_name' => $this->customerName,
             'total_amount' => $this->total,
             'discount' => $this->discount,
             'final_amount' => $this->finalTotal,
+            'payment_method' => $this->paymentMethod,
+            'received_amount' => $this->receivedAmount,
+            'change_amount' => $this->changeAmount,
             'items' => $items,
         ]);
 

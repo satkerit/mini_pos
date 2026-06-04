@@ -30,15 +30,30 @@ class ProductResource extends Resource
         return $schema
             ->components([
                 Select::make('category_id')
+                    ->label(__('Category'))
                     ->relationship('category', 'name')
                     ->required(),
-                TextInput::make('name')->required(),
-                TextInput::make('sku')->required()->unique(ignoreRecord: true),
-                TextInput::make('barcode')->unique(ignoreRecord: true),
-                TextInput::make('price')->numeric()->prefix('IDR')->required(),
-                TextInput::make('cost_price')->numeric()->prefix('IDR')->required(),
-                FileUpload::make('image')->image()->directory('products'),
-                Toggle::make('is_active')->default(true),
+                TextInput::make('name')
+                    ->label(__('Name'))
+                    ->required(),
+                TextInput::make('sku')
+                    ->label(__('SKU'))
+                    ->required()->unique(ignoreRecord: true),
+                TextInput::make('barcode')
+                    ->label(__('Barcode'))
+                    ->unique(ignoreRecord: true),
+                TextInput::make('price')
+                    ->label(__('Price'))
+                    ->numeric()->prefix('IDR')->required(),
+                TextInput::make('cost_price')
+                    ->label(__('Cost Price'))
+                    ->numeric()->prefix('IDR')->required(),
+                FileUpload::make('image')
+                    ->label(__('Image'))
+                    ->image()->directory('products'),
+                Toggle::make('is_active')
+                    ->label(__('Active'))
+                    ->default(true),
             ]);
     }
 
@@ -46,12 +61,22 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                ImageColumn::make('image'),
-                TextColumn::make('name')->searchable(),
-                TextColumn::make('sku')->searchable(),
-                TextColumn::make('category.name'),
-                TextColumn::make('price')->money('IDR'),
-                IconColumn::make('is_active')->boolean(),
+                ImageColumn::make('image')
+                    ->label(__('Image')),
+                TextColumn::make('name')
+                    ->label(__('Name'))
+                    ->searchable(),
+                TextColumn::make('sku')
+                    ->label(__('SKU'))
+                    ->searchable(),
+                TextColumn::make('category.name')
+                    ->label(__('Category')),
+                TextColumn::make('price')
+                    ->label(__('Price'))
+                    ->money('IDR'),
+                IconColumn::make('is_active')
+                    ->label(__('Active'))
+                    ->boolean(),
             ]);
     }
 
