@@ -128,4 +128,99 @@
             <span x-text="message" class="font-semibold"></span>
         </div>
     </div>
+
+    <!-- Receipt Modal -->
+    @if($lastSale)
+    <div class="fixed inset-0 z-[100] flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col max-h-full">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+                <span class="font-bold">Transaction Receipt</span>
+                <button wire:click="closeReceipt" class="text-gray-500 hover:text-gray-700">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            
+            <div id="receipt-content" class="flex-1 overflow-y-auto p-6 font-mono text-sm leading-tight bg-white">
+                <div class="text-center mb-4">
+                    <div class="font-bold text-lg">CoffeePOS</div>
+                    <div>{{ $lastSale->branch->name }}</div>
+                    <div class="text-xs">{{ $lastSale->branch->address }}</div>
+                    <div class="text-xs">Telp: {{ $lastSale->branch->phone }}</div>
+                </div>
+
+                <div class="border-t border-dashed py-2 space-y-1">
+                    <div class="flex justify-between">
+                        <span>Order #</span>
+                        <span>{{ $lastSale->order_number }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Date</span>
+                        <span>{{ $lastSale->created_at->format('d/m/Y H:i') }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Cashier</span>
+                        <span>{{ $lastSale->user->name }}</span>
+                    </div>
+                </div>
+
+                <div class="border-t border-dashed py-2">
+                    @foreach($lastSale->items as $item)
+                    <div class="mb-2">
+                        <div class="flex justify-between uppercase">
+                            <span class="flex-1 mr-2">{{ $item->product->name }}</span>
+                            <span>{{ $item->quantity }}x</span>
+                            <span class="w-20 text-right">{{ number_format($item->unit_price, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+
+                <div class="border-t border-dashed py-2 space-y-1">
+                    <div class="flex justify-between">
+                        <span>SUBTOTAL</span>
+                        <span>IDR {{ number_format($lastSale->total_amount, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between text-red-500">
+                        <span>DISCOUNT</span>
+                        <span>-{{ number_format($lastSale->discount, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-lg pt-1 border-t border-dashed">
+                        <span>TOTAL</span>
+                        <span>IDR {{ number_format($lastSale->final_amount, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                <div class="text-center mt-6 text-xs italic">
+                    Thank you for your visit!<br>
+                    Please come again.
+                </div>
+            </div>
+
+            <div class="p-4 bg-gray-50 border-t flex space-x-2">
+                <button onclick="window.print()" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
+                    <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    PRINT RECEIPT
+                </button>
+            </div>
+        </div>
+    </div>
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #receipt-content, #receipt-content * {
+                visibility: visible;
+            }
+            #receipt-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+        }
+    </style>
+    @endif
 </div>

@@ -34,6 +34,7 @@ class ProductResource extends Resource
                     ->required(),
                 TextInput::make('name')->required(),
                 TextInput::make('sku')->required()->unique(ignoreRecord: true),
+                TextInput::make('barcode')->unique(ignoreRecord: true),
                 TextInput::make('price')->numeric()->prefix('IDR')->required(),
                 TextInput::make('cost_price')->numeric()->prefix('IDR')->required(),
                 FileUpload::make('image')->image()->directory('products'),

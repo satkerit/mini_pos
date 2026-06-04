@@ -20,10 +20,16 @@ class Pos extends Component
     public $branch_id;
     public $paymentMethod = 'cash';
     public $showCart = false;
+    public $lastSale = null;
 
     public function mount()
     {
         $this->branch_id = Auth::user()->branch_id ?? Branch::first()?->id;
+    }
+
+    public function closeReceipt()
+    {
+        $this->lastSale = null;
     }
 
     public function toggleCart()
@@ -56,6 +62,11 @@ class Pos extends Component
         }
 
         $this->calculateTotal();
+
+        // Auto-add if search matches barcode exactly
+        if ($this->search === $product->barcode || $this->search === $product->sku) {
+            $this->search = '';
+        }
     }
 
     public function removeFromCart($productId)
@@ -108,10 +119,13 @@ class Pos extends Component
 
         $paymentService->processPayment($sale->id, $this->finalTotal, $this->paymentMethod);
 
+        $this->lastSale = Sale::with('items.product', 'branch', 'user')->find($sale->id);
+
         $this->cart = [];
         $this->total = 0;
         $this->discount = 0;
         $this->finalTotal = 0;
+        $this->showCart = false;
 
         $this->dispatch('notify', ['type' => 'success', 'message' => 'Sale completed successfully!']);
     }
@@ -119,7 +133,11 @@ class Pos extends Component
     public function render()
     {
         $products = Product::query()
-            ->when($this->search, fn($q) => $q->where('name', 'like', '%' . $this->search . '%'))
+            ->when($this->search, function ($q) {
+                $q->where('name', 'like', '%' . $this->search . '%')
+                    ->orWhere('sku', $this->search)
+                    ->orWhere('barcode', $this->search);
+            })
             ->when($this->selectedCategory, fn($q) => $q->where('category_id', $this->selectedCategory))
             ->where('is_active', true)
             ->get();
