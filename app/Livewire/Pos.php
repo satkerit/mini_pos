@@ -19,10 +19,24 @@ class Pos extends Component
     public $finalTotal = 0;
     public $branch_id;
     public $paymentMethod = 'cash';
+    public $showCart = false;
 
     public function mount()
     {
         $this->branch_id = Auth::user()->branch_id ?? Branch::first()?->id;
+    }
+
+    public function toggleCart()
+    {
+        $this->showCart = !$this->showCart;
+    }
+
+    public function logout()
+    {
+        Auth::guard('web')->logout();
+        session()->invalidate();
+        session()->regenerateToken();
+        return redirect('/');
     }
 
     public function addToCart($productId)
