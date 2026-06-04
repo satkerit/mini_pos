@@ -29,16 +29,13 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Indigo,
             ])
             ->navigationItems([
-                NavigationItem::make('POS System')
-                    ->url(fn (): string => route('pos'))
+                NavigationItem::make(fn() => __('POS System'))
+                    ->url(fn(): string => route('pos'))
                     ->icon('heroicon-o-shopping-cart')
                     ->sort(1),
-            ])
-            ->authMiddleware([
-                \App\Http\Middleware\SetLocale::class,
             ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
@@ -63,6 +60,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                \App\Http\Middleware\SetLocale::class,
             ]);
     }
 }

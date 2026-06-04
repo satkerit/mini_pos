@@ -26,14 +26,35 @@ class BranchResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Branches');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Branch');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Branches');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextInput::make('name')->required(),
-                Textarea::make('address'),
-                TextInput::make('phone'),
-                Toggle::make('is_active')->default(true),
+                TextInput::make('name')
+                    ->label(__('Name'))
+                    ->required(),
+                Textarea::make('address')
+                    ->label(__('Address')),
+                TextInput::make('phone')
+                    ->label(__('Phone')),
+                Toggle::make('is_active')
+                    ->label(__('Active'))
+                    ->default(true),
             ]);
     }
 
@@ -41,9 +62,14 @@ class BranchResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->searchable(),
-                TextColumn::make('phone'),
-                IconColumn::make('is_active')->boolean(),
+                TextColumn::make('name')
+                    ->label(__('Name'))
+                    ->searchable(),
+                TextColumn::make('phone')
+                    ->label(__('Phone')),
+                IconColumn::make('is_active')
+                    ->label(__('Active'))
+                    ->boolean(),
             ])
             ->filters([
                 //

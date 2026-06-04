@@ -30,4 +30,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/barcode/{product}', [App\Http\Controllers\BarcodeController::class, 'generate'])->name('barcode.generate');
+Route::get('/qris/{transactionId}', [App\Http\Controllers\QrCodeController::class, 'generate'])->name('qris.image');
+Route::get('/payment/{payment}/status', [App\Http\Controllers\PaymentController::class, 'checkStatus'])->name('payment.status');
+
+Route::middleware(['auth', 'role:admin'])->get('/admin/barcodes/print', function () {
+    $products = App\Models\Product::where('is_active', true)->get();
+    return view('admin.barcodes.print', compact('products'));
+})->name('admin.barcodes.print');
+
 require __DIR__ . '/auth.php';

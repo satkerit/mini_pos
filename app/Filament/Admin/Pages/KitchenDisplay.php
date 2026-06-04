@@ -19,7 +19,15 @@ class KitchenDisplay extends Page implements HasTable
 
     protected string $view = 'filament.admin.pages.kitchen-display';
 
-    protected static ?string $navigationLabel = 'Kitchen / Barista';
+    public static function getNavigationLabel(): string
+    {
+        return __('Kitchen / Barista');
+    }
+
+    public function getTitle(): string
+    {
+        return __('Kitchen / Barista');
+    }
 
     public function table(Table $table): Table
     {
@@ -32,30 +40,30 @@ class KitchenDisplay extends Page implements HasTable
             )
             ->columns([
                 TextColumn::make('sale.order_number')
-                    ->label('Order #')
+                    ->label(__('Order #'))
                     ->searchable(),
                 TextColumn::make('product.name')
-                    ->label('Item')
+                    ->label(__('Item'))
                     ->weight('bold'),
                 TextColumn::make('quantity')
-                    ->label('Qty')
+                    ->label(__('Qty'))
                     ->badge(),
                 TextColumn::make('sale.created_at')
-                    ->label('Time')
+                    ->label(__('Time'))
                     ->since()
                     ->sortable(),
             ])
             ->actions([
                 Action::make('complete')
-                    ->label('Done')
+                    ->label(__('Done'))
                     ->button()
                     ->color('success')
                     ->icon('heroicon-o-check')
                     ->action(function (SaleItem $record) {
                         $record->update(['is_prepared' => true]);
-
+                        
                         Notification::make()
-                            ->title('Item marked as done')
+                            ->title(__('Item marked as done'))
                             ->success()
                             ->send();
                     }),

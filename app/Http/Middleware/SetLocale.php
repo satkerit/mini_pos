@@ -17,10 +17,18 @@ class SetLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->check() && auth()->user()->locale) {
-            App::setLocale(auth()->user()->locale);
-        } elseif (Session::has('locale')) {
-            App::setLocale(Session::get('locale'));
+        $locale = config('app.locale');
+
+        if (Session::has('locale')) {
+            $locale = Session::get('locale');
+        } elseif (auth()->check() && auth()->user()->locale) {
+            $locale = auth()->user()->locale;
+        } elseif ($request->cookie('filament_language_switch_locale')) {
+            $locale = $request->cookie('filament_language_switch_locale');
+        }
+
+        if (in_array($locale, ['en', 'id'])) {
+            App::setLocale($locale);
         }
 
         return $next($request);

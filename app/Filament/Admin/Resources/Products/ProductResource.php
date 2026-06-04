@@ -7,6 +7,8 @@ use App\Filament\Admin\Resources\Products\Pages\EditProduct;
 use App\Filament\Admin\Resources\Products\Pages\ListProducts;
 use App\Models\Product;
 use BackedEnum;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -25,6 +27,21 @@ class ProductResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Products');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Product');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Products');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -41,7 +58,8 @@ class ProductResource extends Resource
                     ->required()->unique(ignoreRecord: true),
                 TextInput::make('barcode')
                     ->label(__('Barcode'))
-                    ->unique(ignoreRecord: true),
+                    ->unique(ignoreRecord: true)
+                    ->placeholder(__('Leave empty to use SKU')),
                 TextInput::make('price')
                     ->label(__('Price'))
                     ->numeric()->prefix('IDR')->required(),
@@ -69,6 +87,11 @@ class ProductResource extends Resource
                 TextColumn::make('sku')
                     ->label(__('SKU'))
                     ->searchable(),
+                TextColumn::make('barcode')
+                    ->label(__('Barcode'))
+                    ->searchable()
+                    ->copyable()
+                    ->copyMessage('Copied'),
                 TextColumn::make('category.name')
                     ->label(__('Category')),
                 TextColumn::make('price')
@@ -77,6 +100,15 @@ class ProductResource extends Resource
                 IconColumn::make('is_active')
                     ->label(__('Active'))
                     ->boolean(),
+            ])
+            ->recordActions([
+                \Filament\Actions\Action::make('view_barcode')
+                    ->label(__('View Barcode'))
+                    ->icon('heroicon-o-eye')
+                    ->url(fn($record) => route('barcode.generate', $record))
+                    ->openUrlInNewTab(),
+                EditAction::make(),
+                DeleteAction::make(),
             ]);
     }
 

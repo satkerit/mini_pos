@@ -23,14 +23,37 @@ class IngredientResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Ingredients');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Ingredient');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Ingredients');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextInput::make('name')->required(),
-                TextInput::make('unit')->required(),
-                TextInput::make('stock')->numeric()->default(0),
-                TextInput::make('min_stock')->numeric()->default(0),
+                TextInput::make('name')
+                    ->label(__('Name'))
+                    ->required(),
+                TextInput::make('unit')
+                    ->label(__('Unit'))
+                    ->required(),
+                TextInput::make('stock')
+                    ->label(__('Stock'))
+                    ->numeric()->default(0),
+                TextInput::make('min_stock')
+                    ->label(__('Min Stock'))
+                    ->numeric()->default(0),
             ]);
     }
 
@@ -38,10 +61,17 @@ class IngredientResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->searchable(),
-                TextColumn::make('unit'),
-                TextColumn::make('stock')->numeric(),
-                TextColumn::make('min_stock')->numeric(),
+                TextColumn::make('name')
+                    ->label(__('Name'))
+                    ->searchable(),
+                TextColumn::make('unit')
+                    ->label(__('Unit')),
+                TextColumn::make('stock')
+                    ->label(__('Stock'))
+                    ->numeric(),
+                TextColumn::make('min_stock')
+                    ->label(__('Min Stock'))
+                    ->numeric(),
             ])
             ->filters([
                 //

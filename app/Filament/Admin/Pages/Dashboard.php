@@ -12,14 +12,24 @@ class Dashboard extends BaseDashboard
 {
     use HasFiltersForm;
 
+    public function getTitle(): string
+    {
+        return __('Dashboard');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Dashboard');
+    }
+
     public function filtersForm(Form $form): Form
     {
         return $form
             ->schema([
                 Select::make('branch_id')
-                    ->label('Filter Branch')
+                    ->label(__('Filter Branch'))
                     ->options(Branch::pluck('name', 'id'))
-                    ->placeholder('All Branches'),
+                    ->placeholder(__('All Branches')),
             ])
             ->columns(3);
     }

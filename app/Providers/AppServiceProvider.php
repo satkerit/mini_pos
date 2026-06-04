@@ -9,7 +9,9 @@ use App\Models\StockOpname;
 use App\Observers\StockAdjustmentObserver;
 use App\Observers\StockOpnameObserver;
 
-use BezhanSalleh\FilamentLanguageSwitch\LanguageSwitch;
+use BezhanSalleh\LanguageSwitch\LanguageSwitch;
+use Illuminate\Support\Stringable;
+use Illuminate\Support\Str;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -28,6 +30,13 @@ class AppServiceProvider extends ServiceProvider
     {
         StockAdjustment::observe(StockAdjustmentObserver::class);
         StockOpname::observe(StockOpnameObserver::class);
+
+        // Fix for filament-language-switch compatibility with older Laravel versions or specific configurations
+        if (! Stringable::hasMacro('doesntContain')) {
+            Stringable::macro('doesntContain', function ($needles) {
+                return ! Str::contains($this->value, $needles);
+            });
+        }
 
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch

@@ -20,9 +20,19 @@ class ProfitAnalysis extends Page implements HasTable
 
     protected string $view = 'filament.admin.pages.profit-analysis';
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Profit Analysis');
+    }
+
+    public function getTitle(): string
+    {
+        return __('Profit Analysis');
+    }
+
     public static function getNavigationGroup(): ?string
     {
-        return 'Reports';
+        return __('Reports');
     }
 
     public function table(Table $table): Table
@@ -44,23 +54,23 @@ class ProfitAnalysis extends Page implements HasTable
             ->defaultSort('total_profit', 'desc')
             ->columns([
                 TextColumn::make('name')
-                    ->label('Product')
+                    ->label(__('Product'))
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('total_qty')
-                    ->label('Qty Sold')
+                    ->label(__('Qty Sold'))
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('total_revenue')
-                    ->label('Revenue')
+                    ->label(__('Revenue'))
                     ->money('IDR')
                     ->sortable(),
                 TextColumn::make('total_cost')
-                    ->label('Total Cost')
+                    ->label(__('Total Cost'))
                     ->money('IDR')
                     ->sortable(),
                 TextColumn::make('total_profit')
-                    ->label('Gross Profit')
+                    ->label(__('Gross Profit'))
                     ->money('IDR')
                     ->color('success')
                     ->weight('bold')

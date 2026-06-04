@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Branch;
 use App\Models\Sale;
+use App\Models\Payment;
 use App\Services\SalesService;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,9 +24,20 @@ class Pos extends Component
     public $showCart = false;
     public $lastSale = null;
     public $customerName = '';
-    public $receivedAmount = 0;
+    public $receivedAmount = '';
     public $changeAmount = 0;
     public $locale;
+
+    public $showQrPayment = false;
+    public $qrisTransaction = null;
+    public $qrisPayment = null;
+
+    public $showEwalletPayment = false;
+    public $ewalletPayment = null;
+
+    public $showVaPayment = false;
+    public $vaPayment = null;
+    public $vaNumber = '';
 
     public function mount()
     {
@@ -59,15 +71,79 @@ class Pos extends Component
 
     public function calculateChange()
     {
-        $this->changeAmount = max(0, $this->receivedAmount - $this->finalTotal);
+        $received = (float) $this->receivedAmount;
+        $this->changeAmount = max(0, $received - $this->finalTotal);
     }
 
     public function closeReceipt()
     {
         $this->lastSale = null;
         $this->customerName = '';
-        $this->receivedAmount = 0;
+        $this->receivedAmount = '';
         $this->changeAmount = 0;
+    }
+
+    public function closeQrPayment()
+    {
+        $this->showQrPayment = false;
+        $this->qrisTransaction = null;
+        $this->qrisPayment = null;
+    }
+
+    public function closeEwalletPayment()
+    {
+        $this->showEwalletPayment = false;
+        $this->ewalletPayment = null;
+    }
+
+    public function closeVaPayment()
+    {
+        $this->showVaPayment = false;
+        $this->vaPayment = null;
+        $this->vaNumber = '';
+    }
+
+    public function checkQrisStatus($paymentId)
+    {
+        $payment = Payment::find($paymentId);
+        if (!$payment) return;
+
+        $qris = $payment->qrisTransaction;
+        if ($qris && $qris->status === 'pending') {
+            $qris->update(['status' => 'completed']);
+            $payment->update(['status' => 'completed']);
+
+            $this->lastSale = Sale::with('items.product', 'branch', 'user')->find($payment->sale_id);
+            $this->showQrPayment = false;
+
+            $this->dispatch('notify', ['type' => 'success', 'message' => __('Payment confirmed!')]);
+        }
+    }
+
+    public function confirmEwallet($paymentId)
+    {
+        $payment = Payment::find($paymentId);
+        if (!$payment) return;
+
+        $payment->update(['status' => 'completed']);
+
+        $this->lastSale = Sale::with('items.product', 'branch', 'user')->find($payment->sale_id);
+        $this->showEwalletPayment = false;
+
+        $this->dispatch('notify', ['type' => 'success', 'message' => __('Payment confirmed!')]);
+    }
+
+    public function confirmVa($paymentId)
+    {
+        $payment = Payment::find($paymentId);
+        if (!$payment) return;
+
+        $payment->update(['status' => 'completed']);
+
+        $this->lastSale = Sale::with('items.product', 'branch', 'user')->find($payment->sale_id);
+        $this->showVaPayment = false;
+
+        $this->dispatch('notify', ['type' => 'success', 'message' => __('Payment confirmed!')]);
     }
 
     public function toggleCart()
@@ -101,7 +177,6 @@ class Pos extends Component
 
         $this->calculateTotal();
 
-        // Auto-add if search matches barcode exactly
         if ($this->search === $product->barcode || $this->search === $product->sku) {
             $this->search = '';
         }
@@ -154,14 +229,12 @@ class Pos extends Component
             'discount' => $this->discount,
             'final_amount' => $this->finalTotal,
             'payment_method' => $this->paymentMethod,
-            'received_amount' => $this->receivedAmount,
+            'received_amount' => $this->paymentMethod === 'cash' ? (float) $this->receivedAmount : $this->finalTotal,
             'change_amount' => $this->changeAmount,
             'items' => $items,
         ]);
 
-        $paymentService->processPayment($sale->id, $this->finalTotal, $this->paymentMethod);
-
-        $this->lastSale = Sale::with('items.product', 'branch', 'user')->find($sale->id);
+        $payment = $paymentService->processPayment($sale->id, $this->finalTotal, $this->paymentMethod);
 
         $this->cart = [];
         $this->total = 0;
@@ -169,7 +242,28 @@ class Pos extends Component
         $this->finalTotal = 0;
         $this->showCart = false;
 
-        $this->dispatch('notify', ['type' => 'success', 'message' => 'Sale completed successfully!']);
+        if ($this->paymentMethod === 'qris') {
+            $payment->load('qrisTransaction');
+            $this->qrisPayment = $payment;
+            $this->qrisTransaction = $payment->qrisTransaction;
+            $this->showQrPayment = true;
+            $this->dispatch('notify', ['type' => 'success', 'message' => __('Scan QRIS to pay')]);
+        } elseif ($this->paymentMethod === 'e-wallet') {
+            $this->ewalletPayment = $payment;
+            $this->showEwalletPayment = true;
+            $this->dispatch('notify', ['type' => 'success', 'message' => __('Processing e-wallet payment')]);
+        } elseif ($this->paymentMethod === 'va') {
+            $this->vaPayment = $payment;
+            $this->vaNumber = '888' . str_pad($sale->id, 8, '0', STR_PAD_LEFT);
+            $this->showVaPayment = true;
+            $this->dispatch('notify', ['type' => 'success', 'message' => __('Virtual account generated')]);
+        } else {
+            $this->lastSale = Sale::with('items.product', 'branch', 'user')->find($sale->id);
+            $this->dispatch('notify', ['type' => 'success', 'message' => __('Sale completed successfully!')]);
+        }
+
+        $this->receivedAmount = '';
+        $this->changeAmount = 0;
     }
 
     public function render()

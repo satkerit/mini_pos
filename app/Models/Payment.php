@@ -11,13 +11,47 @@ class Payment extends Model
 
     protected $guarded = [];
 
+    protected $casts = [
+        'amount' => 'decimal:2',
+    ];
+
     public function sale()
     {
         return $this->belongsTo(Sale::class);
     }
 
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+
     public function qrisTransaction()
     {
         return $this->hasOne(QrisTransaction::class);
+    }
+
+    public function gatewayLogs()
+    {
+        return $this->hasMany(PaymentGatewayLog::class);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
+
+    public function scopeFailed($query)
+    {
+        return $query->where('status', 'failed');
+    }
+
+    public function scopeByMethod($query, $method)
+    {
+        return $query->where('payment_method', $method);
     }
 }

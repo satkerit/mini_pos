@@ -24,26 +24,49 @@ class RecipeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Recipes');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Recipe');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Recipes');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('product_id')
+                    ->label(__('Product'))
                     ->relationship('product', 'name')
                     ->required(),
-                TextInput::make('name')->required(),
-                Toggle::make('is_active')->default(true),
+                TextInput::make('name')
+                    ->label(__('Name'))
+                    ->required(),
+                Toggle::make('is_active')
+                    ->label(__('Active'))
+                    ->default(true),
                 Repeater::make('details')
+                    ->label(__('Recipe Details'))
                     ->relationship()
                     ->schema([
                         Select::make('ingredient_id')
+                            ->label(__('Ingredient'))
                             ->relationship('ingredient', 'name')
                             ->required(),
                         TextInput::make('amount')
+                            ->label(__('Amount'))
                             ->numeric()
                             ->required(),
                     ])
-                    ->columns(2),
+                    ->columns(2)
             ]);
     }
 
@@ -51,9 +74,15 @@ class RecipeResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('product.name')->searchable(),
-                TextColumn::make('name')->searchable(),
-                IconColumn::make('is_active')->boolean(),
+                TextColumn::make('product.name')
+                    ->label(__('Product'))
+                    ->searchable(),
+                TextColumn::make('name')
+                    ->label(__('Name'))
+                    ->searchable(),
+                IconColumn::make('is_active')
+                    ->label(__('Active'))
+                    ->boolean(),
             ]);
     }
 

@@ -30,4 +30,14 @@ class Sale extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function scopePending($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', 'completed');
+    }
 }

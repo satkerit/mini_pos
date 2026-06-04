@@ -22,22 +22,42 @@ class StockAdjustmentResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Stock Adjustments');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Stock Adjustment');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Stock Adjustments');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('branch_id')
+                    ->label(__('Branch'))
                     ->relationship('branch', 'name')
                     ->required(),
                 Select::make('ingredient_id')
+                    ->label(__('Ingredient'))
                     ->relationship('ingredient', 'name')
                     ->required(),
                 TextInput::make('quantity')
+                    ->label(__('Quantity'))
                     ->numeric()
                     ->required()
-                    ->helperText('Use positive for stock in, negative for stock out'),
-                Textarea::make('reason'),
+                    ->helperText(__('Use positive for stock in, negative for stock out')),
+                Textarea::make('reason')
+                    ->label(__('Reason')),
                 Select::make('user_id')
+                    ->label(__('User'))
                     ->relationship('user', 'name')
                     ->default(auth()->id())
                     ->required(),
@@ -48,11 +68,18 @@ class StockAdjustmentResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('created_at')->dateTime()->sortable(),
-                TextColumn::make('branch.name'),
-                TextColumn::make('ingredient.name'),
-                TextColumn::make('quantity')->numeric(),
-                TextColumn::make('user.name'),
+                TextColumn::make('created_at')
+                    ->label(__('Date'))
+                    ->dateTime()->sortable(),
+                TextColumn::make('branch.name')
+                    ->label(__('Branch')),
+                TextColumn::make('ingredient.name')
+                    ->label(__('Ingredient')),
+                TextColumn::make('quantity')
+                    ->label(__('Quantity'))
+                    ->numeric(),
+                TextColumn::make('user.name')
+                    ->label(__('User')),
             ]);
     }
 

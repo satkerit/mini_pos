@@ -24,20 +24,38 @@ class CategoryResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
+    public static function getNavigationLabel(): string
+    {
+        return __('Categories');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Category');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Categories');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('name')
+                    ->label(__('Name'))
                     ->required()
                     ->live(onBlur: true)
                     ->afterStateUpdated(fn(string $operation, $state, $set) => $operation === 'create' ? $set('slug', str($state)->slug()) : null),
                 TextInput::make('slug')
+                    ->label(__('Slug'))
                     ->disabled()
                     ->dehydrated()
                     ->required()
                     ->unique(Category::class, 'slug', ignoreRecord: true),
                 Select::make('type')
+                    ->label(__('Type'))
                     ->options([
                         'coffee' => 'Coffee',
                         'non-coffee' => 'Non Coffee',
@@ -52,9 +70,14 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->searchable(),
-                TextColumn::make('type')->badge(),
-                TextColumn::make('slug'),
+                TextColumn::make('name')
+                    ->label(__('Name'))
+                    ->searchable(),
+                TextColumn::make('type')
+                    ->label(__('Type'))
+                    ->badge(),
+                TextColumn::make('slug')
+                    ->label(__('Slug')),
             ])
             ->filters([
                 //
