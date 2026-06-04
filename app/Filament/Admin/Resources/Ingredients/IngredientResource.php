@@ -14,6 +14,9 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+
 class IngredientResource extends Resource
 {
     protected static ?string $model = Ingredient::class;
@@ -24,7 +27,10 @@ class IngredientResource extends Resource
     {
         return $schema
             ->components([
-                //
+                TextInput::make('name')->required(),
+                TextInput::make('unit')->required(),
+                TextInput::make('stock')->numeric()->default(0),
+                TextInput::make('min_stock')->numeric()->default(0),
             ]);
     }
 
@@ -32,7 +38,10 @@ class IngredientResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('name')->searchable(),
+                TextColumn::make('unit'),
+                TextColumn::make('stock')->numeric(),
+                TextColumn::make('min_stock')->numeric(),
             ])
             ->filters([
                 //

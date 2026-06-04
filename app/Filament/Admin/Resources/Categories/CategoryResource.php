@@ -14,6 +14,10 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Tables\Columns\TextColumn;
+
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
@@ -24,7 +28,23 @@ class CategoryResource extends Resource
     {
         return $schema
             ->components([
-                //
+                TextInput::make('name')
+                    ->required()
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(fn(string $operation, $state, $set) => $operation === 'create' ? $set('slug', str($state)->slug()) : null),
+                TextInput::make('slug')
+                    ->disabled()
+                    ->dehydrated()
+                    ->required()
+                    ->unique(Category::class, 'slug', ignoreRecord: true),
+                Select::make('type')
+                    ->options([
+                        'coffee' => 'Coffee',
+                        'non-coffee' => 'Non Coffee',
+                        'snack' => 'Snack',
+                        'dessert' => 'Dessert',
+                    ])
+                    ->required(),
             ]);
     }
 
@@ -32,7 +52,9 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('name')->searchable(),
+                TextColumn::make('type')->badge(),
+                TextColumn::make('slug'),
             ])
             ->filters([
                 //

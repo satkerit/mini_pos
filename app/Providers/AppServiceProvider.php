@@ -4,6 +4,11 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
+use App\Models\StockAdjustment;
+use App\Models\StockOpname;
+use App\Observers\StockAdjustmentObserver;
+use App\Observers\StockOpnameObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -19,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        StockAdjustment::observe(StockAdjustmentObserver::class);
+        StockOpname::observe(StockOpnameObserver::class);
     }
 }

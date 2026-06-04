@@ -14,6 +14,12 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+
 class BranchResource extends Resource
 {
     protected static ?string $model = Branch::class;
@@ -24,7 +30,10 @@ class BranchResource extends Resource
     {
         return $schema
             ->components([
-                //
+                TextInput::make('name')->required(),
+                Textarea::make('address'),
+                TextInput::make('phone'),
+                Toggle::make('is_active')->default(true),
             ]);
     }
 
@@ -32,7 +41,9 @@ class BranchResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('name')->searchable(),
+                TextColumn::make('phone'),
+                IconColumn::make('is_active')->boolean(),
             ])
             ->filters([
                 //
