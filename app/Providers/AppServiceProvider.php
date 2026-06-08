@@ -10,6 +10,7 @@ use App\Observers\StockAdjustmentObserver;
 use App\Observers\StockOpnameObserver;
 
 use BezhanSalleh\LanguageSwitch\LanguageSwitch;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Stringable;
 use Illuminate\Support\Str;
 
@@ -30,6 +31,10 @@ class AppServiceProvider extends ServiceProvider
     {
         StockAdjustment::observe(StockAdjustmentObserver::class);
         StockOpname::observe(StockOpnameObserver::class);
+
+        if ($this->app->isProduction()) {
+            Model::shouldBeStrict();
+        }
 
         // Fix for filament-language-switch compatibility with older Laravel versions or specific configurations
         if (! Stringable::hasMacro('doesntContain')) {

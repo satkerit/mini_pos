@@ -31,6 +31,11 @@ class Sale extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function cashShift()
+    {
+        return $this->belongsTo(CashShift::class);
+    }
+
     public function scopePending($query)
     {
         return $query->where('status', 'pending');

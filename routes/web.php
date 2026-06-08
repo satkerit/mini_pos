@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 use App\Livewire\Pos;
+use App\Livewire\ShiftPage;
+use App\Livewire\HistoryPage;
 
 Route::get('/', function () {
     if (auth()->check()) {
@@ -23,6 +25,8 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/pos', Pos::class)->middleware(['auth', 'role:admin|cashier'])->name('pos');
+Route::get('/pos/shift', ShiftPage::class)->middleware(['auth', 'role:admin|cashier'])->name('pos.shift');
+Route::get('/pos/history', HistoryPage::class)->middleware(['auth', 'role:admin|cashier'])->name('pos.history');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

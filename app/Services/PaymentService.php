@@ -6,6 +6,7 @@ use App\Models\Payment;
 use App\Models\PaymentMethod;
 use App\Services\Gateways\PaymentGatewayInterface;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class PaymentService
@@ -43,7 +44,7 @@ class PaymentService
             return ['success' => false, 'status' => 'error', 'message' => 'No gateway found'];
         }
 
-        $qris = $payment->qrisTransaction;
+        $qris = $payment->relationLoaded('qrisTransaction') ? $payment->qrisTransaction : $payment->load('qrisTransaction')->qrisTransaction;
         if ($qris && $qris->status === 'pending') {
             $qris->update(['status' => 'completed']);
             $payment->update(['status' => 'completed']);
@@ -52,7 +53,7 @@ class PaymentService
         return $gateway->checkStatus($payment);
     }
 
-    public function refundPayment(Payment $payment, float $amount = null): array
+    public function refundPayment(Payment $payment, ?float $amount = null): array
     {
         $gateway = $this->resolveGateway($payment->payment_method);
         if (!$gateway) {
@@ -88,7 +89,9 @@ class PaymentService
 
     public function getAvailableMethods(): array
     {
-        return PaymentMethod::active()->get()->toArray();
+        return Cache::remember('payment_methods_active', 3600, function () {
+            return PaymentMethod::active()->get()->toArray();
+        });
     }
 
     public function calculateFee(float $amount, PaymentMethod $method): float

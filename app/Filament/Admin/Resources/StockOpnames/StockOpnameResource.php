@@ -66,6 +66,7 @@ class StockOpnameResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with(['branch', 'ingredient', 'user']))
             ->columns([
                 TextColumn::make('created_at')
                     ->label(__('Date'))

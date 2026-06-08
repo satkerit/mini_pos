@@ -45,6 +45,7 @@ class QrisTransactionResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with('payment.sale'))
             ->columns([
                 TextColumn::make('id')->label('ID')->sortable(),
                 TextColumn::make('payment.sale.order_number')->label(__('Order #'))->searchable(),

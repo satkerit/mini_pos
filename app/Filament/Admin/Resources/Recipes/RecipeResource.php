@@ -73,6 +73,7 @@ class RecipeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with('product'))
             ->columns([
                 TextColumn::make('product.name')
                     ->label(__('Product'))

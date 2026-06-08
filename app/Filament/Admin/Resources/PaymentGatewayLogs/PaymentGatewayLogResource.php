@@ -45,6 +45,7 @@ class PaymentGatewayLogResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with('config'))
             ->columns([
                 TextColumn::make('id')->label('ID')->sortable(),
                 TextColumn::make('config.gateway_code')->label(__('Gateway')),

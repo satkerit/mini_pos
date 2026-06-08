@@ -43,6 +43,12 @@
                     </button>
 
                     <!-- Logout -->
+                    <a href="/pos/shift" class="bg-white/10 backdrop-blur-sm rounded-xl p-2.5 hover:bg-white/20 transition-all duration-200" title="{{ __('Shift') }}">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </a>
+                    <a href="/pos/history" class="bg-white/10 backdrop-blur-sm rounded-xl p-2.5 hover:bg-white/20 transition-all duration-200" title="{{ __('History') }}">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </a>
                     <button wire:click="logout" class="bg-white/10 backdrop-blur-sm rounded-xl p-2.5 hover:bg-white/20 transition-all duration-200" title="Logout">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
@@ -289,6 +295,58 @@
     </div>
     @endif
 
+    <!-- Cash Confirmation Modal -->
+    @if($showConfirm)
+    <div class="modal-backdrop">
+        <div class="modal-content max-w-sm">
+            <div class="modal-header">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-8 h-8 bg-emerald-100 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    </div>
+                    <span class="font-bold">{{ __('Confirm Cash Payment') }}</span>
+                </div>
+                <button wire:click="cancelCheckout" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="modal-body space-y-3">
+                <div class="space-y-2">
+                    @foreach($pendingItems as $item)
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600 truncate mr-2">{{ $item['quantity']}}x {{ collect($cart)->firstWhere('id', $item['product_id'])['name'] ?? 'Item' }}</span>
+                        <span class="font-semibold text-slate-800 whitespace-nowrap">IDR {{ number_format($item['total_price'], 0, ',', '.') }}</span>
+                    </div>
+                    @endforeach
+                </div>
+                <div class="border-t border-dashed border-slate-200 pt-3 space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600">{{ __('Total') }}</span>
+                        <span class="font-bold text-indigo-600">IDR {{ number_format($pendingSaleData['final_amount'] ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-slate-600">{{ __('Received') }}</span>
+                        <span class="font-semibold text-slate-800">IDR {{ number_format($pendingSaleData['received_amount'] ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-emerald-600 font-medium">{{ __('Change') }}</span>
+                        <span class="font-bold text-emerald-600">IDR {{ number_format($pendingSaleData['change_amount'] ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+                <div class="flex space-x-2.5 pt-2">
+                    <button wire:click="cancelCheckout" class="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-all">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button wire:click="confirmSale" class="flex-[2] btn-success py-3">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        {{ __('Confirm Payment') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- QRIS Payment Modal -->
     @if($showQrPayment && $qrisTransaction)
     <div class="modal-backdrop">
@@ -300,7 +358,7 @@
                     </div>
                     <span class="font-bold">{{ __('QRIS Payment') }}</span>
                 </div>
-                <button wire:click="closeQrPayment" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all">
+                <button wire:click="closeQrPayment" onclick="return confirm('{{ __('Are you sure? Payment will be cancelled and stock restored.') }}')" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all">
                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -318,11 +376,15 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
                     </button>
                 </div>
-                <button wire:click="checkQrisStatus({{ $qrisPayment->id }})"
-                        class="btn-success w-full py-3">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    {{ __('Check Payment Status') }}
-                </button>
+                <div class="flex space-x-2.5">
+                    <button wire:click="closeQrPayment" onclick="return confirm('{{ __('Cancel payment? Stock will be restored.') }}')" class="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-all">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button wire:click="checkQrisStatus({{ $qrisPayment->id }})" class="btn-success flex-[2] py-3">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        {{ __('Check Payment Status') }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -339,7 +401,7 @@
                     </div>
                     <span class="font-bold">{{ __('E-Wallet Payment') }}</span>
                 </div>
-                <button wire:click="closeEwalletPayment" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all">
+                <button wire:click="closeEwalletPayment" onclick="return confirm('{{ __('Are you sure? Payment will be cancelled and stock restored.') }}')" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all">
                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -357,11 +419,15 @@
                         <span class="font-medium">{{ __('Redirecting to e-wallet app...') }}</span>
                     </div>
                 </div>
-                <button wire:click="confirmEwallet({{ $ewalletPayment->id }})"
-                        class="btn-success w-full py-3">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    {{ __('Payment Successful') }}
-                </button>
+                <div class="flex space-x-2.5">
+                    <button wire:click="closeEwalletPayment" onclick="return confirm('{{ __('Cancel payment? Stock will be restored.') }}')" class="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-all">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button wire:click="confirmEwallet({{ $ewalletPayment->id }})" class="flex-[2] btn-success py-3">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        {{ __('Payment Successful') }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -378,7 +444,7 @@
                     </div>
                     <span class="font-bold">{{ __('Virtual Account') }}</span>
                 </div>
-                <button wire:click="closeVaPayment" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all">
+                <button wire:click="closeVaPayment" onclick="return confirm('{{ __('Are you sure? Payment will be cancelled and stock restored.') }}')" class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-all">
                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -400,11 +466,15 @@
                     </div>
                 </div>
                 <p class="text-xs text-slate-500">{{ __('Transfer the amount to the virtual account above') }}</p>
-                <button wire:click="confirmVa({{ $vaPayment->id }})"
-                        class="btn-success w-full py-3">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    {{ __('Payment Received') }}
-                </button>
+                <div class="flex space-x-2.5">
+                    <button wire:click="closeVaPayment" onclick="return confirm('{{ __('Cancel payment? Stock will be restored.') }}')" class="flex-1 py-3 rounded-2xl border-2 border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-all">
+                        {{ __('Cancel') }}
+                    </button>
+                    <button wire:click="confirmVa({{ $vaPayment->id }})" class="flex-[2] btn-success py-3">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        {{ __('Payment Received') }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>

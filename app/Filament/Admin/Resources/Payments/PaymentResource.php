@@ -45,6 +45,7 @@ class PaymentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn($query) => $query->with(['sale', 'paymentMethod']))
             ->columns([
                 TextColumn::make('id')->label('ID')->sortable(),
                 TextColumn::make('sale.order_number')->label(__('Order #'))->searchable(),
